@@ -58,7 +58,7 @@ foreign key(PNR) references ticket(PNR)
 
 show tables;
 
-
+_____________________________
 
 *DDL COMMANDS:*
 
@@ -108,6 +108,8 @@ insert into lands_at values("BLR",'UK216');
 insert into lands_at values("JAI",'IGO117');
 insert into lands_at values("JAI",'SG119');
 
+_____________________________
+
 *SELECT COMMAND:*
 select * from flight;
 Select IATA_Code, Name from airport;
@@ -121,25 +123,34 @@ select price*1.06 from ticket;
 Select * from passenger where name like 's%';
 Select * from passenger where name like '%k%';
 
+_____________________________
+
 *ORDER BY COMMAND:*
 Select * from airport order by IATA_Code;
 Select * from ticket order by price desc;
 Select * from ticket order by price desc, duration asc; // ask sir about this
 
+_____________________________
+
 *UPDATE COMMAND:*
 update flight set aircraft_type = 'B737' where Destination = 'Jaipur';
 update ticket set Seat_Number = '29E' where PNR='NHG6678';
+
+_____________________________
 
 *DELETE COMMAND:*
 insert into airline values(6,'Kingfisher');
 delete from airline where Registration_Number = 6;
 
+_____________________________
+
 *NESTED SELECT STATEMENTS:*
 
 select * from ticket where price<=(select  AVG(price) from ticket);
 select PNR,Name,Gender,Phone,Address from passenger where Aadhar_Number in (select Aadhar_Number from passenger);
-
 select PNR,Name,Gender,Phone,Address from passenger where Aadhar_Number in (select Aadhar_Number from passenger where Gender='M');
+
+_____________________________
 
 *VIEWS:*
 create view passenger_view as select * from passenger;
