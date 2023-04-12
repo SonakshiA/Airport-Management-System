@@ -1,0 +1,156 @@
+
+*DML COMMAND - CREATE*
+
+Create database airport_management_system;
+
+Use airport_management_system;
+
+create table airport(
+IATA_Code char(3) primary key, 
+Country varchar(30) NOT NULL, 
+Name varchar(50) NOT NULL UNIQUE
+);
+
+create table airline(
+Registration_Number int primary key, 
+Name varchar(30) NOT NULL
+);
+
+create table flight(
+Flight_Number varchar(10) primary key, 
+IATA_Code char(3), 
+Registration_Number int,
+Source varchar(20) NOT NULL, 
+Destination varchar(20) NOT NULL, 
+Status varchar(10) NOT NULL CHECK(Status in('delayed','on-time')),
+Aircraft_Type varchar(5) DEFAULT 'A320',
+foreign key (IATA_Code) references airport(IATA_Code),
+foreign key(Registration_Number) references airline(Registration_Number)
+);
+
+create table lands_at(
+IATA_Code char(3),
+Flight_Number varchar(10),
+foreign key(IATA_Code) references airport(IATA_Code),
+foreign key(Flight_Number) references flight(Flight_Number)
+);
+
+create table ticket(
+PNR varchar(10) primary key, 
+Duration int, 
+Class varchar(10) CHECK(Class in('Business','Economy','First')),
+Seat_Number varchar(3) UNIQUE NOT NULL, 
+Price float NOT NULL
+);
+
+
+create table passenger(
+Aadhar_Number BigInt primary key,
+PNR varchar(10),
+Flight_Number varchar(10), 
+Name varchar(50), 
+Gender char(1) CHECK(Gender in('M','F')),
+Phone varchar(20) NOT NULL, 
+Address varchar(150) NOT NULL,
+foreign key(Flight_Number) references flight(Flight_Number),
+foreign key(PNR) references ticket(PNR)
+);
+
+show tables;
+
+
+
+*DDL COMMANDS:*
+
+alter table flight drop foreign key flight_ibfk_1;
+alter table flight drop column IATA_Code;
+alter table airline add column (dummy_col int(5));
+alter table airline modify column dummy_col varchar(10);
+alter table airline drop column dummy_col ;
+alter table passenger modify column Aadhar_Number char(12);
+
+desc airline;
+
+insert into airline values(1,"Air India");
+insert into airline values(2,"Indigo");
+insert into airline values(3,"Vistara");
+insert into airline values(4,"Go First");
+insert into airline values(5,"Spice Jet");
+
+insert into airport values("BOM","India","Chattrapati Shivaji International Airport");
+insert into airport values("JAI","India","Sanganer Airport International Airport");
+insert into airport values("DEL","India","Indira Gandhi International Airport");
+insert into airport values("HYD","India","Rajiv Gandhi International Airport");
+insert into airport values("BLR","India","Kempegowda International Airport");
+
+insert into flight values('AI611',1,"Mumbai","Jaipur","on-time","A321");
+insert into flight values('GF117',2,"Mumbai","Delhi","on-time","A321");
+insert into flight values('UK216',3,"Goa","Bangalore","delayed","B737");
+insert into flight values('IGO117',4,"Hyderabad","Jaipur","on-time","B777");
+insert into flight values('SG119',5,"Mumbai","Jaipur","delayed","A319");
+
+
+insert into ticket values("XYZ3452",2,"Economy","26D",5700.00);
+insert into ticket values("NHG6678",1,"Economy","4A",5700.00);
+insert into ticket values("PQR1189",3,"Business","8B",4100.00);
+insert into ticket values("SDF5562",2,"First","9C",7893.00);
+insert into ticket values("UYH6627",2,"First","11F",11000.00);
+
+insert into passenger(Aadhar_Number,PNR,Flight_Number,Name,Gender,Phone,Address) values("123456789102","XYZ3452","AI611","Sonakshi","F","9111008100","Manipal Univeristy Jaipur");
+insert into passenger(Aadhar_Number,PNR,Flight_Number,Name,Gender,Phone,Address) values("334566789976","NHG6678","IGO117","Saloni Jain","F","8879855643","201, Windsor House Tonk Road");
+insert into passenger(Aadhar_Number,PNR,Flight_Number,Name,Gender,Phone,Address) values("244199378247","PQR1189","GF117","Karan Arora","M","9987005623","A-Wing, Rustom Apartments, Kalkaji");
+insert into passenger(Aadhar_Number,PNR,Flight_Number,Name,Gender,Phone,Address) values("117899326654","SDF5562","UK216","Vikram Kumar","M","7765199006","441 B-Wing, Augusta, Lodha Park, Whitefield");
+insert into passenger(Aadhar_Number,PNR,Flight_Number,Name,Gender,Phone,Address) values("389765420098","UYH6627","SG119","Chandra Sharma ","F","9819800176","561 Omkar 1970, Worli");
+
+insert into lands_at values("JAI",'AI611');
+insert into lands_at values("DEL",'GF117');
+insert into lands_at values("BLR",'UK216');
+insert into lands_at values("JAI",'IGO117');
+insert into lands_at values("JAI",'SG119');
+
+*SELECT COMMAND:*
+select * from flight;
+Select IATA_Code, Name from airport;
+select * from ticket where class='First';
+select * from passenger where Gender = 'M' AND Flight_Number='UK216';
+select * from ticket where price>5000;
+select * from ticket where price between 5000 AND 7000;
+select * from flight where DESTINATION IN ('JAIPUR','DELHI');
+select * from flight where DESTINATION NOT IN ('DELHI');
+select price*1.06 from ticket;
+Select * from passenger where name like 's%';
+Select * from passenger where name like '%k%';
+
+*ORDER BY COMMAND:*
+Select * from airport order by IATA_Code;
+Select * from ticket order by price desc;
+Select * from ticket order by price desc, duration asc; // ask sir about this
+
+*UPDATE COMMAND:*
+update flight set aircraft_type = 'B737' where Destination = 'Jaipur';
+update ticket set Seat_Number = '29E' where PNR='NHG6678';
+
+*DELETE COMMAND:*
+insert into airline values(6,'Kingfisher');
+delete from airline where Registration_Number = 6;
+
+*NESTED SELECT STATEMENTS:*
+
+select * from ticket where price<=(select  AVG(price) from ticket);
+select PNR,Name,Gender,Phone,Address from passenger where Aadhar_Number in (select Aadhar_Number from passenger);
+
+select PNR,Name,Gender,Phone,Address from passenger where Aadhar_Number in (select Aadhar_Number from passenger where Gender='M');
+
+*VIEWS:*
+create view passenger_view as select * from passenger;
+select * from passenger_view;
+update passenger_view set address = 'Manipal University Jaipur' where Name = 'Sonakshi';
+
+create view ticket_view as select * from ticket;
+create view ticket_view as select * from ticket where price>6000 with check option;
+drop view ticket_view;
+
+
+
+
+
